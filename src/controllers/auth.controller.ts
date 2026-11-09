@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 import { signupSchema } from "../validations/auth.validation.js";
+import type { AuthRequest } from "../middleware/auth.middleware.js";
 
 const cookieOptions = {
   httpOnly: true,
@@ -13,7 +14,31 @@ const cookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
-// SIGNUP
+export const getMe = async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await User.findById(req.userId).select(
+      "name email role avatar createdAt"
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch user details",
+    });
+  }
+};
+
 export const signup = async (req: Request, res: Response) => {
   try {
     const validation = signupSchema.safeParse(req.body);
@@ -65,7 +90,6 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-// LOGIN
 export const login = async (req: Request, res: Response) => {
   try {
     const validation = signupSchema
@@ -130,7 +154,6 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-// LOGOUT
 export const logout = (_req: Request, res: Response) => {
   res.clearCookie("token", cookieOptions);
 
