@@ -41,7 +41,6 @@ export const createTask = async (
       dueDate,
     } = validation.data;
 
-    // 3. Validate MongoDB IDs
     if (!mongoose.isValidObjectId(req.userId)) {
       return res.status(400).json({
         success: false,
@@ -49,7 +48,6 @@ export const createTask = async (
       });
     }
 
-    // 4. Check if project exists
     const project = await Project.findById(projectId);
 
     if (!project) {
@@ -59,7 +57,6 @@ export const createTask = async (
       });
     }
 
-    // 5. Check if assignee exists
     if (assigneeId) {
       const assignee = await User.findById(assigneeId);
 
@@ -72,18 +69,18 @@ export const createTask = async (
     }
 
     const task = await Task.create({
-  title,
-  projectId,
-  createdBy: new mongoose.Types.ObjectId(req.userId),
+      title,
+      projectId,
+      createdBy: new mongoose.Types.ObjectId(req.userId),
 
-  ...(description !== undefined && { description }),
-  ...(assigneeId !== undefined && {
-    assigneeId: new mongoose.Types.ObjectId(assigneeId),
-  }),
-  ...(priority !== undefined && { priority }),
-  ...(status !== undefined && { status }),
-  ...(dueDate !== undefined && { dueDate }),
-});
+      ...(description !== undefined && { description }),
+      ...(assigneeId !== undefined && {
+        assigneeId: new mongoose.Types.ObjectId(assigneeId),
+      }),
+      ...(priority !== undefined && { priority }),
+      ...(status !== undefined && { status }),
+      ...(dueDate !== undefined && { dueDate }),
+    });
 
     return res.status(201).json({
       success: true,
