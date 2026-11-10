@@ -10,7 +10,6 @@ import {
   updateProjectSchema,
 } from "../validations/project.validation.js";
 
-// CREATE PROJECT
 export const createProject = async (
   req: AuthRequest,
   res: Response
@@ -33,11 +32,11 @@ export const createProject = async (
       });
     }
 
-    const project = await Project.create({
-      ...validation.data,
-      owner: new mongoose.Types.ObjectId(req.userId),
-    });
-
+const project = await new Project({
+  ...validation.data,
+  owner: new mongoose.Types.ObjectId(req.userId),
+}).save();
+await project.save();
     return res.status(201).json({
       success: true,
       message: "Project created successfully",
@@ -53,7 +52,6 @@ export const createProject = async (
   }
 };
 
-// GET ALL PROJECTS
 export const getProjects = async (
   req: AuthRequest,
   res: Response
@@ -66,9 +64,9 @@ export const getProjects = async (
       });
     }
 
-    const projects = await Project.find({
-      owner: req.userId,
-    }).sort({ createdAt: -1 });
+   const projects = await Project.find({
+  ownerId: req.userId,
+}).sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -85,7 +83,6 @@ export const getProjects = async (
   }
 };
 
-// GET SINGLE PROJECT
 export const getProjectById = async (
   req: AuthRequest,
   res: Response
@@ -107,10 +104,10 @@ export const getProjectById = async (
       });
     }
 
-    const project = await Project.findOne({
-      _id: id,
-      owner: req.userId,
-    });
+  const project = await Project.findOne({
+  _id: id,
+  ownerId: req.userId,
+});
 
     if (!project) {
       return res.status(404).json({
@@ -133,7 +130,6 @@ export const getProjectById = async (
   }
 };
 
-// UPDATE PROJECT
 export const updateProject = async (
   req: AuthRequest,
   res: Response
@@ -172,19 +168,17 @@ export const updateProject = async (
       });
     }
 
-    const project = await Project.findOneAndUpdate(
-      {
-        _id: id,
-        owner: req.userId,
-      },
-      {
-        $set: validation.data,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+ const project = await Project.findOneAndUpdate(
+  {
+    _id: id,
+    ownerId: req.userId,
+  },
+  { $set: validation.data },
+  {
+    new: true,
+    runValidators: true,
+  }
+);
 
     if (!project) {
       return res.status(404).json({
@@ -208,7 +202,6 @@ export const updateProject = async (
   }
 };
 
-// DELETE PROJECT
 export const deleteProject = async (
   req: AuthRequest,
   res: Response
@@ -230,10 +223,10 @@ export const deleteProject = async (
       });
     }
 
-    const project = await Project.findOneAndDelete({
-      _id: id,
-      owner: req.userId,
-    });
+ const project = await Project.findOneAndDelete({
+  _id: id,
+  ownerId: req.userId,
+});
 
     if (!project) {
       return res.status(404).json({
