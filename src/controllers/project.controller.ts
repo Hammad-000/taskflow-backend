@@ -35,7 +35,7 @@ export const createProject = async (
 const project = await new Project({
   ...validation.data,
   owner: new mongoose.Types.ObjectId(req.userId),
-}).save();
+}).save();;
 await project.save();
     return res.status(201).json({
       success: true,
@@ -57,16 +57,18 @@ export const getProjects = async (
   res: Response
 ) => {
   try {
-    if (!req.userId || !mongoose.isValidObjectId(req.userId)) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required",
-      });
-    }
+    console.log("Logged-in User ID:", req.userId);
 
-   const projects = await Project.find({
-  ownerId: req.userId,
-}).sort({ createdAt: -1 });
+    const allProjects = await Project.find({});
+
+    console.log("Total Projects:", allProjects.length);
+    console.log("First Project:", allProjects[0]);
+
+    const projects = await Project.find({
+      owner: new mongoose.Types.ObjectId(req.userId),
+    }).sort({ createdAt: -1 });
+
+    console.log("Matched Projects:", projects.length);
 
     return res.status(200).json({
       success: true,
@@ -106,7 +108,7 @@ export const getProjectById = async (
 
   const project = await Project.findOne({
   _id: id,
-  ownerId: req.userId,
+  owner: req.userId,
 });
 
     if (!project) {
@@ -171,7 +173,7 @@ export const updateProject = async (
  const project = await Project.findOneAndUpdate(
   {
     _id: id,
-    ownerId: req.userId,
+    owner: req.userId,
   },
   { $set: validation.data },
   {
@@ -225,7 +227,7 @@ export const deleteProject = async (
 
  const project = await Project.findOneAndDelete({
   _id: id,
-  ownerId: req.userId,
+  owner: req.userId,
 });
 
     if (!project) {
@@ -248,3 +250,8 @@ export const deleteProject = async (
     });
   }
 };
+
+const projects = await Project.find({});
+
+console.log("Projects found:", projects.length);
+console.log("Projects data:", projects);
