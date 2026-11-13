@@ -24,13 +24,21 @@ export const getDashboardStats = async (
       totalProjects,
       totalTasks,
       completedTasks,
+      recentProjects,
     ] = await Promise.all([
       Project.countDocuments({ owner: userId }),
+
       Task.countDocuments({ createdBy: userId }),
+
       Task.countDocuments({
         createdBy: userId,
         status: "done",
       }),
+
+      Project.find({ owner: userId })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select("name status createdAt"),
     ]);
 
     return res.status(200).json({
@@ -41,7 +49,9 @@ export const getDashboardStats = async (
         teamMembers: 0,
         completedTasks,
       },
+      recentProjects,
     });
+
   } catch (error) {
     console.error("Dashboard stats error:", error);
 
