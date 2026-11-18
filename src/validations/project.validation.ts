@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const createProjectSchema = z.object({
@@ -10,4 +11,8 @@ export const updateProjectSchema = z.object({
   name: z.string().trim().min(3).max(100).optional(),
   description: z.string().trim().max(1000).optional(),
   status: z.enum(["active", "completed", "on_hold"]).optional(),
+});
+
+export const addProjectMemberSchema = z.object({
+  email: z.string().trim().email("Please enter a valid email address"),
 });

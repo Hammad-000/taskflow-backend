@@ -1,3 +1,4 @@
+
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IProject extends Document {
@@ -5,6 +6,7 @@ export interface IProject extends Document {
   description?: string;
   status: "active" | "completed" | "on_hold";
   owner: Types.ObjectId;
+  members: Types.ObjectId[];
 }
 
 const projectSchema = new Schema<IProject>(
@@ -16,21 +18,31 @@ const projectSchema = new Schema<IProject>(
       minlength: 3,
       maxlength: 100,
     },
+
     description: {
       type: String,
       trim: true,
       maxlength: 1000,
     },
+
     status: {
       type: String,
       enum: ["active", "completed", "on_hold"],
       default: "active",
     },
- owner: {
-  type: Schema.Types.ObjectId,
-  ref: "User",
-  required: true,
-},
+
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    members: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

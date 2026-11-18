@@ -13,7 +13,6 @@ import {
   updateTaskSchema,
 } from "../validations/task.validation.js";
 
-// CREATE TASK
 export const createTask = async (req: AuthRequest, res: Response) => {
   try {
     const validation = createTaskSchema.safeParse(req.body);
@@ -38,14 +37,17 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 
     const data = validation.data;
 
-    const project = await Project.findById(data.projectId);
+  const project = await Project.findOne({
+  _id: data.projectId,
+  owner: req.userId,
+});
 
-    if (!project) {
-      return res.status(404).json({
-        success: false,
-        message: "Project not found",
-      });
-    }
+if (!project) {
+  return res.status(404).json({
+    success: false,
+    message: "Project not found or access denied",
+  });
+}
 
     if (data.assigneeId) {
       const assignee = await User.findById(data.assigneeId);
@@ -94,7 +96,6 @@ export const createTask = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// GET ALL TASKS
 export const getTasks = async (req: AuthRequest, res: Response) => {
   try {
     if (
@@ -129,7 +130,6 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// GET SINGLE TASK
 export const getTaskById = async (req: AuthRequest, res: Response) => {
   try {
     const taskId = req.params.id;
@@ -182,7 +182,6 @@ export const getTaskById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// UPDATE TASK
 export const updateTask = async (req: AuthRequest, res: Response) => {
   try {
     const taskId = req.params.id;
@@ -219,16 +218,19 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 
     const data = validation.data;
 
-    if (data.projectId) {
-      const project = await Project.findById(data.projectId);
+   if (data.projectId) {
+  const project = await Project.findOne({
+    _id: data.projectId,
+    owner: req.userId,
+  });
 
-      if (!project) {
-        return res.status(404).json({
-          success: false,
-          message: "Project not found",
-        });
-      }
-    }
+  if (!project) {
+    return res.status(404).json({
+      success: false,
+      message: "Project not found or access denied",
+    });
+  }
+}
 
     if (data.assigneeId) {
       const assignee = await User.findById(data.assigneeId);
@@ -336,7 +338,6 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// DELETE TASK
 export const deleteTask = async (req: AuthRequest, res: Response) => {
   try {
     const taskId = req.params.id;
