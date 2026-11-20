@@ -37,17 +37,17 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 
     const data = validation.data;
 
-  const project = await Project.findOne({
-  _id: data.projectId,
-  owner: req.userId,
-});
+    const project = await Project.findOne({
+      _id: data.projectId,
+      owner: req.userId,
+    });
 
-if (!project) {
-  return res.status(404).json({
-    success: false,
-    message: "Project not found or access denied",
-  });
-}
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or access denied",
+      });
+    }
 
     if (data.assigneeId) {
       const assignee = await User.findById(data.assigneeId);
@@ -218,19 +218,19 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 
     const data = validation.data;
 
-   if (data.projectId) {
-  const project = await Project.findOne({
-    _id: data.projectId,
-    owner: req.userId,
-  });
+    if (data.projectId) {
+      const project = await Project.findOne({
+        _id: data.projectId,
+        owner: req.userId,
+      });
 
-  if (!project) {
-    return res.status(404).json({
-      success: false,
-      message: "Project not found or access denied",
-    });
-  }
-}
+      if (!project) {
+        return res.status(404).json({
+          success: false,
+          message: "Project not found or access denied",
+        });
+      }
+    }
 
     if (data.assigneeId) {
       const assignee = await User.findById(data.assigneeId);

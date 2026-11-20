@@ -12,6 +12,78 @@ import {
   addProjectMemberSchema,
 } from "../validations/project.validation.js";
 
+
+export const removeProjectMember = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const { id, memberId } = req.params;
+
+    if (!req.userId || !mongoose.isValidObjectId(req.userId)) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    if (
+      !id ||
+      !memberId ||
+      !mongoose.isValidObjectId(id) ||
+      !mongoose.isValidObjectId(memberId)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid project or member ID",
+      });
+    }
+
+    const project = await Project.findOne({
+      _id: id,
+      owner: req.userId,
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or you are not the owner",
+      });
+    }
+
+    const isMember = project.members.some(
+      (member) => member.toString() === memberId
+    );
+
+    if (!isMember) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found in this project",
+      });
+    }
+
+    project.members = project.members.filter(
+      (member) => member.toString() !== memberId
+    );
+
+    await project.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Project member removed successfully",
+      project,
+    });
+  } catch (error) {
+    console.error("Remove project member error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to remove project member",
+    });
+  }
+};
+
+
 export const createProject = async (
   req: AuthRequest,
   res: Response
@@ -347,5 +419,4 @@ export const addProjectMember = async (
   }
 };
 
-const projects = await Project.find({});
 
