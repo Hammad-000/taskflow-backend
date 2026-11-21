@@ -419,4 +419,45 @@ export const addProjectMember = async (
   }
 };
 
+export const getProjectMembers = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
 
+    if (!id || !mongoose.isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid project ID",
+      });
+    }
+
+    const userId = new mongoose.Types.ObjectId(req.userId);
+
+    const project = await Project.findOne({
+      _id: id,
+      $or: [{ owner: userId }, { members: userId }],
+    }).populate("members", "name email avatar role");
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or access denied",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      count: project.members.length,
+      members: project.members,
+    });
+  } catch (error) {
+    console.error("Get project members error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch project members",
+    });
+  }
+};

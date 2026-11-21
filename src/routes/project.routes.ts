@@ -10,6 +10,7 @@ import {
   deleteProject,
   addProjectMember,
   removeProjectMember,
+  getProjectMembers,
 } from "../controllers/project.controller.js";
 
 const router = Router();
@@ -23,5 +24,6 @@ router.post("/:id/members", addProjectMember);
 router.put("/:id", updateProject);
 router.delete("/:id", deleteProject);
 router.delete("/:id/members/:memberId", removeProjectMember);
+router.get("/:id/members", getProjectMembers);
 
 export default router;
